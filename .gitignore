@@ -1,0 +1,26 @@
+# 构建产物 / 大二进制 —— 不入库(GPL 二进制走 Release + SOURCES.md)
+*.img
+*.img.gz
+*.img.xz
+*.tar.gz
+*.tar.xz
+*.zip
+output/
+toolchains*/
+*.deb
+*.apk
+*.ipk
+
+# 专有固件 blob —— 严禁入库,由脚本从官方源拉取
+*.bin
+wifi_*.ini
+wcnmodem*
+
+# 版权材料(手册等)
+*.pdf
+
+# 临时/日志
+out-*.txt
+*.log
+_*.sh
+.DS_Store

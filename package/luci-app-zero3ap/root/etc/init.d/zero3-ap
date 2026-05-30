@@ -1,0 +1,89 @@
+#!/bin/sh /etc/rc.common
+# 板载 UWE5622 AP: 独立 hostapd, 配置来自 UCI(/etc/config/zero3ap), 由 luci-app-zero3ap 管理
+START=99
+STOP=10
+USE_PROCD=1
+CONF=/etc/hostapd-wlan0.conf
+
+gen_conf() {
+	config_load zero3ap
+	local ssid key channel hidden encryption country
+	config_get ssid       config ssid       'OrangePi-Zero3'
+	config_get key        config key         '12345678'
+	config_get channel    config channel     '6'
+	config_get hidden     config hidden      '0'
+	config_get encryption config encryption  'psk2'
+	config_get country    config country     'CN'
+	{
+		echo "interface=wlan0"
+		echo "bridge=br-lan"
+		echo "driver=nl80211"
+		echo "ctrl_interface=/var/run/hostapd"
+		echo "ctrl_interface_group=0"
+		echo "hw_mode=g"
+		echo "channel=$channel"
+		echo "country_code=$country"
+		echo "ieee80211d=1"
+		echo "ieee80211n=1"
+		echo "wmm_enabled=1"
+		echo "ssid=$ssid"
+		[ "$hidden" = "1" ] && echo "ignore_broadcast_ssid=1"
+		echo "auth_algs=1"
+		if [ "$encryption" = "psk2" ]; then
+			echo "wpa=2"
+			echo "wpa_key_mgmt=WPA-PSK"
+			echo "rsn_pairwise=CCMP"
+			echo "wpa_passphrase=$key"
+		fi
+	} > "$CONF"
+}
+
+start_service() {
+	config_load zero3ap
+	local enabled; config_get enabled config enabled '1'
+	[ "$enabled" = "1" ] || { logger -t zero3-ap "AP 已在配置中禁用, 不启动"; return 0; }
+
+	local i=0
+	while [ ! -e /sys/class/net/wlan0 ] && [ "$i" -lt 25 ]; do
+		modprobe sprdwl_ng 2>/dev/null; sleep 1; i=$((i+1))
+	done
+	[ -e /sys/class/net/wlan0 ] || { logger -t zero3-ap "wlan0 未出现, 跳过"; return 0; }
+
+	local mac; mac=$(cat /sys/class/net/wlan0/address 2>/dev/null)
+	if [ "$mac" = "00:00:00:00:00:00" ] || [ -z "$mac" ]; then
+		local base o1 rest newo1 newmac
+		base=$(cat /sys/class/net/eth0/address 2>/dev/null)
+		if [ -n "$base" ]; then
+			o1=$(echo "$base" | cut -d: -f1); rest=$(echo "$base" | cut -d: -f2-6)
+			newo1=$(printf '%02x' $(( (0x$o1 | 2) & 0xfe ))); newmac="$newo1:$rest"
+		else
+			newmac="02:e0:4c:00:11:22"
+		fi
+		ip link set wlan0 down 2>/dev/null
+		ip link set wlan0 address "$newmac" 2>/dev/null
+		logger -t zero3-ap "已设置 wlan0 MAC=$newmac"
+	fi
+
+	gen_conf
+
+	procd_open_instance
+	procd_set_param command /usr/sbin/hostapd "$CONF"
+	procd_set_param respawn 3600 5 0
+	procd_set_param stderr 1
+	procd_close_instance
+}
+
+stop_service() {
+	killall hostapd 2>/dev/null
+	ip link set wlan0 down 2>/dev/null
+}
+
+service_triggers() {
+	procd_add_reload_trigger "zero3ap"
+}
+
+reload_service() {
+	stop_service
+	sleep 1
+	start_service
+}

@@ -1,0 +1,8 @@
+config zero3ap 'config'
+	option enabled '1'
+	option ssid 'OrangePi-Zero3'
+	option encryption 'psk2'
+	option key '12345678'
+	option channel '6'
+	option hidden '0'
+	option country 'CN'

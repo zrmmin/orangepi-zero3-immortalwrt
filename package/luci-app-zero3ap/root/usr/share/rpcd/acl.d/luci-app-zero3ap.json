@@ -1,0 +1,7 @@
+{
+	"luci-app-zero3ap": {
+		"description": "管理板载 AP (zero3ap)",
+		"read":  { "uci": [ "zero3ap" ] },
+		"write": { "uci": [ "zero3ap" ] }
+	}
+}

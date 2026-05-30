@@ -1,0 +1,8 @@
+{
+	"admin/network/zero3ap": {
+		"title": "板载 AP (WiFi)",
+		"order": 15,
+		"action": { "type": "view", "path": "zero3ap/settings" },
+		"depends": { "acl": [ "luci-app-zero3ap" ] }
+	}
+}
