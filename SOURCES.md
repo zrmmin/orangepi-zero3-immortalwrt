@@ -9,14 +9,16 @@
 
 > 在出镜像的那次构建后,用 `git -C <repo> rev-parse HEAD` 记录各上游仓库的精确 commit。
 
-| 组件 | 仓库 URL | 分支/Tag | Commit (40位) |
+| 组件 | 仓库 URL | 分支/Tag | Commit |
 |---|---|---|---|
-| ImmortalWrt | https://github.com/immortalwrt/immortalwrt | `<填写>` | `<填写>` |
-| OrangePi Linux | https://github.com/orangepi-xunlong/linux-orangepi | `orange-pi-6.1-sun50iw9` | `<填写>` |
-| U-Boot orangepi | https://github.com/orangepi-xunlong/u-boot-orangepi | `<填写>` | `<填写>` |
-| OpenClash | https://github.com/vernesong/OpenClash | `<填写>` | `<填写>` |
+| ImmortalWrt | https://github.com/immortalwrt/immortalwrt | `master` | `6efdfa7a1fd7491a74deba9b2726bf61332d8c82` |
+| orangepi-build(拉取下列内核/U-Boot) | https://github.com/orangepi-xunlong/orangepi-build | `master` | `7f776a2` |
+| Linux kernel | (由 orangepi-build 拉取)`orange-pi-6.1-sun50iw9` | 6.1.31-sun50iw9 | 见 orangepi-build 对应锁定 |
+| U-Boot | (由 orangepi-build 拉取) | `v2024.01` (orangepi) | 见 orangepi-build 对应锁定 |
+| OpenClash | https://github.com/vernesong/OpenClash | 经 ImmortalWrt feed 锁定 | 随上述 ImmortalWrt commit |
 
-本仓库(构建配方)的 commit:`<填写>`
+发布镜像:`openwrt_h618_zero3_immortalwrt_k6.1.31-sun50iw9.img.gz`
+SHA256:`31e7ca341b06fa329ac6a79c888f0bc7a277be02923de520f2423ee1aa25fc05`
 
 ## 2. 构建配置
 
